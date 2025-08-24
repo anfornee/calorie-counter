@@ -1,33 +1,43 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useEffect, useState } from 'react'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [data, setData] = useState<any>(null);
+
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const response = await fetch("https://api.api-ninjas.com/v1/nutrition?query=2+scrambled+eggs", {
+          headers: {
+            "X-Api-Key": import.meta.env.VITE_SUPER_SECRET_API_KEY
+          }
+        });
+        const resData = await response.json();
+        setData(resData);
+      } catch (error) {
+        setData(error);
+      }
+    };
+
+    getData();
+  }, []);
+  console.log('import.meta.env.SUPER_SECRET_API_KEY: ', import.meta.env.VITE_SUPER_SECRET_API_KEY)
+  console.log('data: ', data);
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
+      <h1>Count em</h1>
       <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
+        Don't be fat
       </p>
+      {data && data.length && data.map((thing: any) => {
+        return <div>
+          <h2>{thing.name}</h2>
+          <p>
+            Calories: {thing.calories}
+          </p>
+        </div>
+      })}
     </>
   )
 }
