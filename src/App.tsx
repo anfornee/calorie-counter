@@ -1,67 +1,87 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import retrieveFoodNutrients from './helpers/retrieveFoodNutrients';
+import searchFood from './helpers/searchFood';
 import './App.css'
 
 function App() {
-  const [data, setData] = useState<any>(null);
+  const [searchResults, setSearchResults] = useState<any>(null);
+  const [foodNutrients, setFoodNutrients] = useState<any>(null);
+  const [query, setQuery] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
-  useEffect(() => {
-    const getData = async () => {
+  const handleQueryValueChanged = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(e.target.value);
+  }
+
+  const handleSearchFoodSubmitted = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (query) {
       try {
-        // find a food's fdc id
-        let response = await fetch(`https://api.nal.usda.gov/fdc/v1/foods/search?query=cheddar%20cheese&dataType=Foundation,SR%20Legacy&pageSize=10&pageNumber=1&sortBy=dataType.keyword&sortOrder=asc&api_key=${import.meta.env.VITE_SUPER_SECRET_API_KEY}`, {
-          headers: {
-            accept: "application/json"
-          }
-        });
-        let resData = await response.json();
-        console.log('FIRST all resData: ', resData);
-        const foods = resData.foods;
-        const firstFood = foods[0];
-        const foodFdcId = firstFood.fdcId;
-
-        // get the foods information
-        response = await fetch(`https://api.nal.usda.gov/fdc/v1/food/${foodFdcId}?format=abridged&nutrients=208&api_key=${import.meta.env.VITE_SUPER_SECRET_API_KEY}`, {
-          headers: {
-            accept: "application/json"
-          }
-        });
-        resData = await response.json();
-        console.log('SECOND all resData: ', resData);
-        const foodName = resData.description;
-        const caloriesNutrient = resData.foodNutrients[0];
-        const caloriesAmount = caloriesNutrient.number;
-
-        const dataList = [
-          {
-            name: foodName,
-            calories: caloriesAmount
-          }
-        ];
-        setData(dataList);
+        const searchFoodResult = await searchFood({ query });
+        if (Array.isArray(searchFoodResult) && searchFoodResult.length) {
+          setSearchResults(searchFoodResult);
+        } else {
+          window.alert('No results found.')
+        }
       } catch (error) {
-        setData(error);
+        if (error instanceof Error) {
+          setErrorMessage(error.message);
+        } else {
+          setErrorMessage('There was an error with the request.')
+        }
       }
-    };
+    }
+  }
 
-    getData();
-  }, []);
-
-  console.log('data: ', data);
+  const handleSearchItemClicked = async (itemIndex: number) => {
+    const selectedFood = searchResults[itemIndex];
+    try {
+      const foodNutrientsResult = await retrieveFoodNutrients({ fdcId: selectedFood.fdcId });
+      if (foodNutrientsResult) {
+        setFoodNutrients(foodNutrientsResult);
+      } else {
+        window.alert('No results found.')
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage('There was an error with the request.')
+      }
+    }
+  }
 
   return (
     <>
       <h1>Count em</h1>
-      <p className="read-the-docs">
+      <p className='read-the-docs'>
         Don't be fat
       </p>
-      {data && data.length && data.map((thing: any, i: number) => {
-        return <div key={`${new Date().getTime()}-${i}`}>
-          <h2>{thing.name}</h2>
+      {errorMessage && <p className='error-message'>{errorMessage}</p>}
+      <form onSubmit={handleSearchFoodSubmitted} className='food-query-form' >
+        <label className='food-query-form-label'>Search Food</label>
+        <input className='food-query-form-input' placeholder='Egg' value={query} onChange={handleQueryValueChanged} />
+        <input className='food-query-form-submit' type="submit" value={"Search"} />
+      </form>
+      {searchResults && searchResults.length && searchResults.map((item: any, i: number) => {
+        return (
+          <button
+            key={`search-result-item-${new Date().getTime()}-${i}`}
+            onClick={() => handleSearchItemClicked(i)}
+            className='search-result-item-button'
+          >
+            {item.description}
+          </button>
+        )
+      })}
+      {foodNutrients && (
+        <div>
+          <h3>{foodNutrients.name}</h3>
           <p>
-            Calories: {thing.calories}
+            Calories: {foodNutrients.calories}
           </p>
         </div>
-      })}
+      )}
     </>
   )
 }

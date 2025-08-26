@@ -1,0 +1,33 @@
+.error-message {
+  font-size: 1.5rem;
+  color: red;
+}
+
+.food-query-form {
+  border: 1px solid lightblue;
+  margin: 0 0 32px 0;
+  padding: 16px;
+  width: fit-content;
+}
+
+.food-query-form-label {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.food-query-form-input {
+  display: block;
+  padding: 4px 8px;
+}
+
+.food-query-form-submit {
+  display: block;
+  margin: 16px 0;
+  padding: 4px 8px;  
+}
+
+.search-result-item-button {
+  display: block;
+  margin: 16px 0;
+  padding: 4px 8px;
+}
