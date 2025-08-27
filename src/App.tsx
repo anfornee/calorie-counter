@@ -7,6 +7,8 @@ function App() {
   const [searchResults, setSearchResults] = useState<any>(null);
   const [foodNutrients, setFoodNutrients] = useState<any>(null);
   const [query, setQuery] = useState<string>('');
+  const [dailyFoodList, setDailyFoodList] = useState<{ name: string, calories: string }[] | null>(null);
+  const [dailyCaloriesTotal, setDailyCaloriesTotal] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string>('');
 
   const handleQueryValueChanged = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,6 +53,15 @@ function App() {
     }
   }
 
+  const handleAddFoodClicked = () => {
+    if (foodNutrients) {
+      const originalFoodList = dailyFoodList && dailyFoodList.length ? [...dailyFoodList] : [];
+      const newDailyCaloriesTotal = dailyCaloriesTotal + foodNutrients.calories;
+      setDailyCaloriesTotal(newDailyCaloriesTotal)
+      setDailyFoodList([...originalFoodList, foodNutrients])
+    }
+  }
+
   return (
     <>
       <h1>Count em</h1>
@@ -80,8 +91,30 @@ function App() {
           <p>
             Calories: {foodNutrients.calories}
           </p>
+          <button onClick={handleAddFoodClicked}>Add Food</button>
         </div>
       )}
+      <div className='daily-food-list-container'>
+        <h3 className='daily-food-list-title'>Daily Food List</h3>
+        <ul className='daily-food-list'>
+          {dailyFoodList && dailyFoodList.length ? <>
+            <li className='daily-food-list-item'>
+              <span className='daily-food-list-item-subitem'>Name</span>
+              <span className='daily-food-list-item-subitem'>Calories</span>
+            </li>
+            {dailyFoodList.map(foodItem => <li className='daily-food-list-item'>
+              <span className='daily-food-list-item-subitem'>{foodItem.name}</span>
+              <span className='daily-food-list-item-subitem'>{foodItem.calories}</span>
+            </li>)}
+            <li className='daily-food-list-item'>
+              <span className='daily-food-list-item-subitem'>TOTAL</span>
+              <span className='daily-food-list-item-subitem'>
+                {dailyCaloriesTotal}
+              </span>
+            </li>            
+          </> : <li className='daily-food-list-item'>No items added</li>}
+        </ul>
+      </div>
     </>
   )
 }
