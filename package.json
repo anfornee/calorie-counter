@@ -1,7 +1,6 @@
 {
-  "name": "calorie-counter",
-  "private": true,
-  "version": "0.0.0",
+  "name": "count-em",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "firebase": "^12.2.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },
