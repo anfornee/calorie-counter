@@ -1,0 +1,77 @@
+.error-message {
+  font-size: 1.5rem;
+  color: red;
+}
+
+.food-query-form {
+  border: 1px solid lightblue;
+  margin: 0 0 32px 0;
+  padding: 16px;
+  width: fit-content;
+}
+
+.food-query-form-label {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.food-query-form-input {
+  display: block;
+  padding: 4px 8px;
+}
+
+.food-query-form-submit {
+  display: block;
+  margin: 16px 0;
+  padding: 4px 8px;
+}
+
+.search-result-item-button {
+  display: block;
+  margin: 16px 0;
+  padding: 4px 8px;
+}
+
+.daily-food-list-container {
+  width: 325px;
+  border: 1px solid lightblue;
+}
+
+.daily-food-list-title {
+  line-height: 1.5rem;
+  font-size: 1.5rem;
+  margin: 0;
+  padding: 15px 0;
+  text-align: center;
+}
+
+.daily-food-list {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.daily-food-list-item {
+  border-top: 1px solid lightblue;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.daily-food-list-item:not(:has(.daily-food-list-item-subitem)) {
+  padding: 5px 10px;
+}
+
+.daily-food-list-item-subitem {
+  display: inline-block;
+  white-space: nowrap;
+  width: 50%;
+  text-align: center;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  padding: 5px 10px;
+}
+
+.daily-food-list-item-subitem:first-child {
+  border-right: 1px solid lightblue;
+}
