@@ -1,7 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { doSignOut } from '../../firebase/auth';
-import { httpsCallable } from "firebase/functions";
-import { functions } from '../../firebase/firebase';
 import './styles.css'
 
 function App() {
@@ -20,10 +18,9 @@ function App() {
     e.preventDefault();
     if (query) {
       try {
-        const searchFood = httpsCallable(functions, "searchFood");
-
-        const searchFoodResult = await searchFood({ foodQuery: "egg" })
-        const searchFoodData = searchFoodResult.data
+        console.log("query: ", query)
+        const searchFoodResult = await fetch(`${import.meta.env.VITE_FIREBASE_CLOUD_FUNCTIONS_ENDPOINT}searchFood?foodQuery=${query}`);
+        const searchFoodData = await searchFoodResult.json();
         if (Array.isArray(searchFoodData) && searchFoodData.length) {
           setSearchResults(searchFoodData);
         } else {

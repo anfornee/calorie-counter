@@ -1,4 +1,4 @@
-import { onCall } from "firebase-functions/v2/https";
+import { onRequest } from "firebase-functions/https";
 
 const searchFood = async ({
   foodQuery,
@@ -17,7 +17,7 @@ const searchFood = async ({
         accept: "application/json"
       }
     });
-    const resData = await response.json();
+    let resData = await response.json();
     const listOfFoods = resData.foods;
     return listOfFoods
   } catch (error) {
@@ -29,19 +29,23 @@ const searchFood = async ({
   }
 }
 
-export default onCall(async (request) => {
-  const { foodQuery, pageSize, pageNumber } = request.data;
+export default onRequest(
+  { cors: true },
+  async (request, response) => {
+  const { foodQuery, pageSize, pageNumber } = request.query;
   try {
     if (!foodQuery || typeof foodQuery !== 'string' || !foodQuery.length) throw new Error("Did not recieve a valid food query.")
     const validatedPageSize = pageSize && typeof pageSize === 'string' ? parseInt(pageSize) : 10;
     const validatedPageNumber = pageNumber && typeof pageNumber === 'string' ? parseInt(pageNumber) : 10;
     const successfulResult = await searchFood({ foodQuery, pageSize: validatedPageSize, pageNumber: validatedPageNumber })
-    return successfulResult
+    response.send(successfulResult)
   } catch (error) {
     let errorMessage = "There was an error with your request."
     if (error instanceof Error) {
       errorMessage = error.message
     }
-    return errorMessage
+    response
+      .status(400)
+      .send(errorMessage)
   }
 });
