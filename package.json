@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "functions": "firebase deploy --only functions",
+    "emulate-functions": "firebase emulators:start --only functions",
     "lint": "eslint .",
     "preview": "vite preview"
   },

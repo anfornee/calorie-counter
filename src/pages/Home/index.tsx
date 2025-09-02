@@ -1,14 +1,14 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { doSignOut } from '../../firebase/auth';
-import retrieveFoodNutrients from '../../helpers/retrieveFoodNutrients';
-import searchFood from '../../helpers/searchFood';
+import { httpsCallable } from "firebase/functions";
+import { functions } from '../../firebase/firebase';
 import './styles.css'
 
 function App() {
   const [searchResults, setSearchResults] = useState<any>(null);
-  const [foodNutrients, setFoodNutrients] = useState<any>(null);
+  const [foodData, setFoodData] = useState<any>(null);
   const [query, setQuery] = useState<string>('');
-  const [dailyFoodList, setDailyFoodList] = useState<{ name: string, calories: string }[] | null>(null);
+  const [dailyFoodList, setDailyFoodList] = useState<{ description: string, calories: string }[] | null>(null);
   const [dailyCaloriesTotal, setDailyCaloriesTotal] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string>('');
 
@@ -20,9 +20,12 @@ function App() {
     e.preventDefault();
     if (query) {
       try {
-        const searchFoodResult = await searchFood({ query });
-        if (Array.isArray(searchFoodResult) && searchFoodResult.length) {
-          setSearchResults(searchFoodResult);
+        const searchFood = httpsCallable(functions, "searchFood");
+
+        const searchFoodResult = await searchFood({ foodQuery: "egg" })
+        const searchFoodData = searchFoodResult.data
+        if (Array.isArray(searchFoodData) && searchFoodData.length) {
+          setSearchResults(searchFoodData);
         } else {
           window.alert('No results found.')
         }
@@ -36,30 +39,19 @@ function App() {
     }
   }
 
-  const handleSearchItemClicked = async (itemIndex: number) => {
+  const handleSearchItemClicked = (itemIndex: number) => {
     const selectedFood = searchResults[itemIndex];
-    try {
-      const foodNutrientsResult = await retrieveFoodNutrients({ fdcId: selectedFood.fdcId });
-      if (foodNutrientsResult) {
-        setFoodNutrients(foodNutrientsResult);
-      } else {
-        window.alert('No results found.')
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        setErrorMessage(error.message);
-      } else {
-        setErrorMessage('There was an error with the request.')
-      }
-    }
+    const foodCalories = selectedFood.foodNutrients.find((nutrient: any) => "KCAL" === nutrient.unitName)
+    selectedFood.calories = foodCalories.value;
+    setFoodData(selectedFood);
   }
 
   const handleAddFoodClicked = () => {
-    if (foodNutrients) {
+    if (foodData) {
       const originalFoodList = dailyFoodList && dailyFoodList.length ? [...dailyFoodList] : [];
-      const newDailyCaloriesTotal = dailyCaloriesTotal + foodNutrients.calories;
+      const newDailyCaloriesTotal = dailyCaloriesTotal + foodData.calories;
       setDailyCaloriesTotal(newDailyCaloriesTotal)
-      setDailyFoodList([...originalFoodList, foodNutrients])
+      setDailyFoodList([...originalFoodList, foodData])
     }
   }
 
@@ -87,11 +79,11 @@ function App() {
           </button>
         )
       })}
-      {foodNutrients && (
+      {foodData && (
         <div>
-          <h3>{foodNutrients.name}</h3>
+          <h3>{foodData.description}</h3>
           <p>
-            Calories: {foodNutrients.calories}
+            Calories: {foodData.calories}
           </p>
           <button onClick={handleAddFoodClicked}>Add Food</button>
         </div>
@@ -104,8 +96,8 @@ function App() {
               <span className='daily-food-list-item-subitem'>Name</span>
               <span className='daily-food-list-item-subitem'>Calories</span>
             </li>
-            {dailyFoodList.map(foodItem => <li className='daily-food-list-item'>
-              <span className='daily-food-list-item-subitem'>{foodItem.name}</span>
+            {dailyFoodList.map((foodItem, i) => <li key={`daily-food-list-item-${new Date().getTime()}-${i}`} className='daily-food-list-item'>
+              <span className='daily-food-list-item-subitem'>{foodItem.description}</span>
               <span className='daily-food-list-item-subitem'>{foodItem.calories}</span>
             </li>)}
             <li className='daily-food-list-item'>
@@ -113,7 +105,7 @@ function App() {
               <span className='daily-food-list-item-subitem'>
                 {dailyCaloriesTotal}
               </span>
-            </li>            
+            </li>
           </> : <li className='daily-food-list-item'>No items added</li>}
         </ul>
       </div>
