@@ -19,7 +19,7 @@
   "apphosting": [
     {
       "backendId": "count-em-back",
-      "rootDir": "src",
+      "rootDir": ".",
       "ignore": [
         "node_modules",
         ".git",
