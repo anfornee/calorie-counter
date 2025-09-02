@@ -15,7 +15,7 @@ export default async function searchFood({
         accept: "application/json"
       }
     });
-    let resData = await response.json();
+    const resData = await response.json();
     const listOfFoods = resData.foods;
     return listOfFoods
   } catch (error) {

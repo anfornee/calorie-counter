@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { doSignOut } from '../../firebase/auth';
 import { httpsCallable } from "firebase/functions";
 import { functions } from '../../firebase/firebase';
