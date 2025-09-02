@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { doSignOut } from '../../firebase/auth';
 import './styles.css'
 
